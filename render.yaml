@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: khonkaenthaishop-api
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: apps/backend
+    buildCommand: cd ../.. && npm install && npm run build:backend && npm run db:generate
+    startCommand: cd ../.. && npm run start:prod --workspace=backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        value: https://khonkaenthaishop.vercel.app
+    healthCheckPath: /api
