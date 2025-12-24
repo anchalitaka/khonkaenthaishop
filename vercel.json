@@ -3,6 +3,7 @@
   "buildCommand": "npm run build:frontend",
   "devCommand": "npm run dev:frontend",
   "installCommand": "npm install",
-  "framework": null,
-  "outputDirectory": "apps/frontend/.next"
+  "framework": "nextjs",
+  "outputDirectory": "apps/frontend/.next",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./apps/frontend"
 }
