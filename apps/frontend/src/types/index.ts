@@ -2,11 +2,42 @@
 export interface User {
   id: string;
   email: string;
-  name: string | null;
-  role: 'USER' | 'ADMIN';
+  role: "USER" | "ADMIN";
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+
+  // ข้อมูลส่วนตัว (Personal Information)
+  employeeType?: string | null;
+  nationalId?: string | null;
+  titleTh?: string | null;
+  firstNameTh?: string | null;
+  lastNameTh?: string | null;
+  firstNameEn?: string | null;
+  lastNameEn?: string | null;
+  nickname?: string | null;
+  gender?: string | null;
+  bloodType?: string | null;
+  birthDate?: string | null;
+  ethnicity?: string | null;
+  nationality?: string | null;
+  religion?: string | null;
+  phone?: string | null;
+  province?: string | null;
+  maritalStatus?: string | null;
+
+  // ข้อมูลการทำงาน (Employment Information)
+  username?: string | null;
+  employeeId?: string | null;
+  position?: string | null;
+  positionLevel?: string | null;
+  department?: string | null;
+  employmentStatus?: string | null;
+  startDate?: string | null;
+
+  // Legacy
+  name?: string | null;
+
   _count?: {
     posts: number;
     comments: number;
@@ -16,16 +47,76 @@ export interface User {
 export interface CreateUserInput {
   email: string;
   password: string;
+
+  // ข้อมูลส่วนตัว
+  employeeType?: string;
+  nationalId?: string;
+  titleTh?: string;
+  firstNameTh?: string;
+  lastNameTh?: string;
+  firstNameEn?: string;
+  lastNameEn?: string;
+  nickname?: string;
+  gender?: string;
+  bloodType?: string;
+  birthDate?: string;
+  ethnicity?: string;
+  nationality?: string;
+  religion?: string;
+  phone?: string;
+  province?: string;
+  maritalStatus?: string;
+
+  // ข้อมูลการทำงาน
+  username?: string;
+  employeeId?: string;
+  position?: string;
+  positionLevel?: string;
+  department?: string;
+  employmentStatus?: string;
+  startDate?: string;
+
+  // Legacy
   name?: string;
-  role?: 'USER' | 'ADMIN';
+  role?: "USER" | "ADMIN";
 }
 
 export interface UpdateUserInput {
   email?: string;
   password?: string;
-  name?: string;
   isActive?: boolean;
-  role?: 'USER' | 'ADMIN';
+  role?: "USER" | "ADMIN";
+
+  // ข้อมูลส่วนตัว
+  employeeType?: string;
+  nationalId?: string;
+  titleTh?: string;
+  firstNameTh?: string;
+  lastNameTh?: string;
+  firstNameEn?: string;
+  lastNameEn?: string;
+  nickname?: string;
+  gender?: string;
+  bloodType?: string;
+  birthDate?: string;
+  ethnicity?: string;
+  nationality?: string;
+  religion?: string;
+  phone?: string;
+  province?: string;
+  maritalStatus?: string;
+
+  // ข้อมูลการทำงาน
+  username?: string;
+  employeeId?: string;
+  position?: string;
+  positionLevel?: string;
+  department?: string;
+  employmentStatus?: string;
+  startDate?: string;
+
+  // Legacy
+  name?: string;
 }
 
 // Post types

@@ -13,37 +13,70 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { password, ...rest } = createUserDto;
+    try {
+      const { password, birthDate, startDate, ...rest } = createUserDto;
 
-    // Check if user already exists
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: createUserDto.email },
-    });
+      // Check if user already exists
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: createUserDto.email },
+      });
 
-    if (existingUser) {
-      throw new ConflictException('Email already exists');
+      if (existingUser) {
+        throw new ConflictException('Email already exists');
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const user = await this.prisma.user.create({
+        data: {
+          ...rest,
+          password: hashedPassword,
+          birthDate: birthDate ? new Date(birthDate) : undefined,
+          startDate: startDate ? new Date(startDate) : undefined,
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+          // Personal Information
+          employeeType: true,
+          nationalId: true,
+          titleTh: true,
+          firstNameTh: true,
+          lastNameTh: true,
+          firstNameEn: true,
+          lastNameEn: true,
+          nickname: true,
+          gender: true,
+          bloodType: true,
+          birthDate: true,
+          ethnicity: true,
+          nationality: true,
+          religion: true,
+          phone: true,
+          province: true,
+          maritalStatus: true,
+          // Employment Information
+          username: true,
+          employeeId: true,
+          position: true,
+          positionLevel: true,
+          department: true,
+          employmentStatus: true,
+          startDate: true,
+        },
+      });
+
+      return user;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
     }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await this.prisma.user.create({
-      data: {
-        ...rest,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    return user;
   }
 
   async findAll(params?: {
@@ -68,6 +101,32 @@ export class UsersService {
           isActive: true,
           createdAt: true,
           updatedAt: true,
+          // Personal Information
+          employeeType: true,
+          nationalId: true,
+          titleTh: true,
+          firstNameTh: true,
+          lastNameTh: true,
+          firstNameEn: true,
+          lastNameEn: true,
+          nickname: true,
+          gender: true,
+          bloodType: true,
+          birthDate: true,
+          ethnicity: true,
+          nationality: true,
+          religion: true,
+          phone: true,
+          province: true,
+          maritalStatus: true,
+          // Employment Information
+          username: true,
+          employeeId: true,
+          position: true,
+          positionLevel: true,
+          department: true,
+          employmentStatus: true,
+          startDate: true,
           _count: {
             select: {
               posts: true,
@@ -100,6 +159,32 @@ export class UsersService {
         isActive: true,
         createdAt: true,
         updatedAt: true,
+        // Personal Information
+        employeeType: true,
+        nationalId: true,
+        titleTh: true,
+        firstNameTh: true,
+        lastNameTh: true,
+        firstNameEn: true,
+        lastNameEn: true,
+        nickname: true,
+        gender: true,
+        bloodType: true,
+        birthDate: true,
+        ethnicity: true,
+        nationality: true,
+        religion: true,
+        phone: true,
+        province: true,
+        maritalStatus: true,
+        // Employment Information
+        username: true,
+        employeeId: true,
+        position: true,
+        positionLevel: true,
+        department: true,
+        employmentStatus: true,
+        startDate: true,
         posts: {
           select: {
             id: true,
@@ -136,12 +221,20 @@ export class UsersService {
     // Check if user exists
     await this.findOne(id);
 
-    const { password, ...rest } = updateUserDto;
+    const { password, birthDate, startDate, ...rest } = updateUserDto;
 
     const data: Prisma.UserUpdateInput = { ...rest };
 
     if (password) {
       data.password = await bcrypt.hash(password, 10);
+    }
+
+    if (birthDate) {
+      data.birthDate = new Date(birthDate);
+    }
+
+    if (startDate) {
+      data.startDate = new Date(startDate);
     }
 
     const user = await this.prisma.user.update({
@@ -155,6 +248,32 @@ export class UsersService {
         isActive: true,
         createdAt: true,
         updatedAt: true,
+        // Personal Information
+        employeeType: true,
+        nationalId: true,
+        titleTh: true,
+        firstNameTh: true,
+        lastNameTh: true,
+        firstNameEn: true,
+        lastNameEn: true,
+        nickname: true,
+        gender: true,
+        bloodType: true,
+        birthDate: true,
+        ethnicity: true,
+        nationality: true,
+        religion: true,
+        phone: true,
+        province: true,
+        maritalStatus: true,
+        // Employment Information
+        username: true,
+        employeeId: true,
+        position: true,
+        positionLevel: true,
+        department: true,
+        employmentStatus: true,
+        startDate: true,
       },
     });
 

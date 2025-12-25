@@ -17,12 +17,42 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  name      String?
   password  String
   role      Role     @default(USER)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // ข้อมูลส่วนตัว (Personal Information)
+  employeeType  String?  // ประเภทบุคคล (พนักงานประจำ, สัญญาจ้าง)
+  nationalId    String?  @unique // เลขประจำตัวประชาชน
+  titleTh       String?  // คำนำหน้า (นาย, นาง, นางสาว)
+  firstNameTh   String?  // ชื่อ(ภาษาไทย)
+  lastNameTh    String?  // นามสกุล(ภาษาไทย)
+  firstNameEn   String?  // ชื่อ(ภาษาอังกฤษ)
+  lastNameEn    String?  // นามสกุล(ภาษาอังกฤษ)
+  nickname      String?  // ชื่อเล่น
+  gender        String?  // เพศ (ชาย, หญิง)
+  bloodType     String?  // หมู่โลหิต
+  birthDate     DateTime? // วันเกิด
+  ethnicity     String?  // เชื้อชาติ
+  nationality   String?  // สัญชาติ
+  religion      String?  // ศาสนา
+  phone         String?  // เบอร์โทรศัพท์
+  province      String?  // ภูมิลำเนา จังหวัด
+  maritalStatus String?  // สถานภาพสมรส
+
+  // ข้อมูลการทำงาน (Employment Information)
+  username         String?  @unique // รหัสผู้ใช้
+  employeeId       String?  @unique // รหัสพนักงาน
+  position         String?  // ตำแหน่ง
+  positionLevel    String?  // ระดับตำแหน่ง
+  department       String?  // แผนก
+  employmentStatus String?  // สถานะการจ้างงาน
+  startDate        DateTime? // วันที่เริ่มงาน
+
+  // Legacy field (for compatibility)
+  name String? // ชื่อเต็ม (deprecated, use firstNameTh/lastNameTh instead)
 
   posts    Post[]
   comments Comment[]
