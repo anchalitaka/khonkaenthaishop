@@ -10,6 +10,7 @@ import type { CreateUserInput } from "@/types";
 export default function UsersPage() {
   const { data, error, isLoading, mutate } = useUsers({ take: 20 });
   const [showForm, setShowForm] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [formData, setFormData] = useState<CreateUserInput>({
     email: "",
     password: "",
@@ -43,7 +44,7 @@ export default function UsersPage() {
 
   // ฟังก์ชันสร้าง username แบบสุ่ม
   const generateRandomUsername = () => {
-    const prefix = formData.firstNameEn?.toLowerCase() || 'user';
+    const prefix = formData.firstNameEn?.toLowerCase() || "user";
     const randomNum = Math.floor(Math.random() * 10000);
     const randomStr = Math.random().toString(36).substring(2, 5);
     return `${prefix}${randomNum}${randomStr}`;
@@ -130,7 +131,14 @@ export default function UsersPage() {
         ])
       ) as CreateUserInput;
 
-      await usersApi.create(cleanedData);
+      if (editingUserId) {
+        // Update existing user
+        await usersApi.update(editingUserId, cleanedData);
+      } else {
+        // Create new user
+        await usersApi.create(cleanedData);
+      }
+
       // Reset form
       setFormData({
         email: "",
@@ -151,7 +159,6 @@ export default function UsersPage() {
         religion: "",
         phone: "",
         province: "",
-
         maritalStatus: "",
         username: "",
         employeeId: "",
@@ -162,6 +169,7 @@ export default function UsersPage() {
         startDate: "",
       });
       setShowForm(false);
+      setEditingUserId(null);
       mutate();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
@@ -169,6 +177,48 @@ export default function UsersPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleUpdate = (id: string) => {
+    const user = data?.data.find((u) => u.id === id);
+    if (!user) return;
+
+    // Format dates for input fields
+    const formatDate = (date: string | null | undefined) => {
+      if (!date) return "";
+      return new Date(date).toISOString().split("T")[0];
+    };
+
+    setFormData({
+      email: user.email,
+      password: "", // Don't populate password for security
+      employeeType: user.employeeType || "",
+      nationalId: user.nationalId || "",
+      titleTh: user.titleTh || "",
+      firstNameTh: user.firstNameTh || "",
+      lastNameTh: user.lastNameTh || "",
+      firstNameEn: user.firstNameEn || "",
+      lastNameEn: user.lastNameEn || "",
+      nickname: user.nickname || "",
+      gender: user.gender || "",
+      bloodType: user.bloodType || "",
+      birthDate: formatDate(user.birthDate),
+      ethnicity: user.ethnicity || "",
+      nationality: user.nationality || "",
+      religion: user.religion || "",
+      phone: user.phone || "",
+      province: user.province || "",
+      maritalStatus: user.maritalStatus || "",
+      username: user.username || "",
+      employeeId: user.employeeId || "",
+      position: user.position || "",
+      positionLevel: user.positionLevel || "",
+      department: user.department || "",
+      employmentStatus: user.employmentStatus || "",
+      startDate: formatDate(user.startDate),
+    });
+    setEditingUserId(id);
+    setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -202,21 +252,55 @@ export default function UsersPage() {
     );
   }
 
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditingUserId(null);
+    setFormData({
+      email: "",
+      password: "",
+      employeeType: "",
+      nationalId: "",
+      titleTh: "",
+      firstNameTh: "",
+      lastNameTh: "",
+      firstNameEn: "",
+      lastNameEn: "",
+      nickname: "",
+      gender: "",
+      bloodType: "",
+      birthDate: "",
+      ethnicity: "",
+      nationality: "",
+      religion: "",
+      phone: "",
+      province: "",
+      maritalStatus: "",
+      username: "",
+      employeeId: "",
+      position: "",
+      positionLevel: "",
+      department: "",
+      employmentStatus: "",
+      startDate: "",
+    });
+    setFormError("");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">จัดการผู้ใช้งาน</h1>
-        <Button onClick={() => setShowForm(!showForm)}>
+        <Button onClick={() => (showForm ? handleCancel() : setShowForm(true))}>
           {showForm ? "ยกเลิก" : "+ เพิ่มผู้ใช้ใหม่"}
         </Button>
       </div>
 
-      {/* Add User Form */}
+      {/* Add/Edit User Form */}
       {showForm && (
         <Card>
           <CardHeader>
             <h2 className="text-lg font-semibold text-black">
-              เพิ่มผู้ใช้ใหม่
+              {editingUserId ? "แก้ไขข้อมูลผู้ใช้" : "เพิ่มผู้ใช้ใหม่"}
             </h2>
           </CardHeader>
           <CardBody>
@@ -508,7 +592,7 @@ export default function UsersPage() {
       {/* Users List */}
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold">
+          <h2 className="text-lg font-semibold text-black">
             รายชื่อผู้ใช้ ({data?.meta.total || 0} คน)
           </h2>
         </CardHeader>
@@ -534,7 +618,10 @@ export default function UsersPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   สถานะ
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  colSpan={2}
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
                   การจัดการ
                 </th>
               </tr>
@@ -583,6 +670,15 @@ export default function UsersPage() {
                     >
                       {user.isActive ? "ใช้งาน" : "ปิดใช้งาน"}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleUpdate(user.id)}
+                    >
+                      แก้ไข
+                    </Button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Button
