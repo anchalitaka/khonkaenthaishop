@@ -88,7 +88,7 @@ Region: Singapore
 Branch: main
 Root Directory: apps/backend
 Runtime: Node
-Build Command: cd ../.. && npm install && npm run build:backend && npm run db:generate
+Build Command: cd ../.. && npm install && npm run db:generate && npm run build:backend
 Start Command: cd ../.. && npm run start:prod --workspace=backend
 ```
 
@@ -101,7 +101,8 @@ NODE_ENV=production
 PORT=10000
 
 # Supabase Database (REQUIRED - Get from Supabase Dashboard)
-DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.tnsuurwxjxpraldilqwt.supabase.co:6543/postgres?pgbouncer=true
+# ⚠️ IMPORTANT: Use Transaction Pooler (IPv4 compatible) for DATABASE_URL on Render
+DATABASE_URL=postgresql://postgres.tnsuurwxjxpraldilqwt:[YOUR-PASSWORD]@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres
 DIRECT_URL=postgresql://postgres:[YOUR-PASSWORD]@db.tnsuurwxjxpraldilqwt.supabase.co:5432/postgres
 
 # JWT Configuration
@@ -114,8 +115,14 @@ FRONTEND_URL=https://khonkaenthaishop.vercel.app
 
 **To get DATABASE_URL from Supabase:**
 1. Go to Supabase Dashboard → Project Settings → Database
-2. Copy "Connection Pooling" string (Transaction mode)
-3. Replace `[YOUR-PASSWORD]` with your actual password
+2. Scroll to "Connection Pooling" section
+3. **Select "Transaction" mode** (NOT Session mode)
+4. Copy the connection string - should look like:
+   ```
+   postgresql://postgres.tnsuurwxjxpraldilqwt:[YOUR-PASSWORD]@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres
+   ```
+5. **Important**: Transaction Pooler is IPv4 compatible and works with Render's free tier
+6. Direct Connection (port 5432) only supports IPv6 and requires paid tier on Render
 
 #### Health Check
 ```
@@ -129,6 +136,31 @@ Health Check Path: /api
 3. Verify at: https://khonkaenthaishop-api.onrender.com/api
 
 ### Troubleshooting Render
+
+**Issue: "nest: not found" during build**
+- **Cause**: @nestjs/cli is missing from dependencies
+- **Solution**: Ensure @nestjs/cli is in `dependencies` (NOT devDependencies) in `apps/backend/package.json`
+- **Why**: Production builds on Render don't install devDependencies
+
+**Issue: TypeScript errors about Prisma types during build**
+- **Cause**: Build command is running `build:backend` before `db:generate`
+- **Solution**: Build command must be: `npm run db:generate && npm run build:backend`
+- **Why**: Prisma Client must be generated before TypeScript compilation
+
+**Issue: "Can't reach database server" or P1001 error**
+- **Cause**: Using wrong connection string format or IPv6-only connection
+- **Solution**:
+  - Use **Transaction Pooler** connection string (IPv4 compatible)
+  - Format: `postgresql://postgres.PROJECT_ID:PASSWORD@aws-*.pooler.supabase.com:6543/postgres`
+  - NOT: `postgresql://postgres:PASSWORD@db.*.supabase.co:5432/postgres` (IPv6 only)
+- **Why**: Render free tier only supports IPv4, Direct Connection requires IPv6
+
+**Issue: Authentication failed (P1000)**
+- **Cause**: Incorrect password in connection string
+- **Solution**:
+  - Reset password in Supabase Dashboard → Database Settings
+  - Update both DATABASE_URL and DIRECT_URL in Render with new password
+  - Redeploy
 
 **Issue: Build fails on Prisma**
 - Ensure `DATABASE_URL` is set correctly
@@ -153,9 +185,22 @@ Health Check Path: /api
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
 2. Select your project
 3. Go to **Settings** → **Database**
-4. Copy connection strings:
-   - **Connection Pooling (Transaction mode)** → Use for `DATABASE_URL`
-   - **Direct connection** → Use for `DIRECT_URL`
+4. Scroll to **"Connection Pooling"** section
+5. **Select "Transaction" mode** (this is IPv4 compatible)
+6. Copy the connection string for `DATABASE_URL`:
+   ```
+   postgresql://postgres.PROJECT_ID:[PASSWORD]@aws-*.pooler.supabase.com:6543/postgres
+   ```
+7. Scroll to **"Connection string"** section (Direct connection)
+8. Copy the connection string for `DIRECT_URL`:
+   ```
+   postgresql://postgres:[PASSWORD]@db.PROJECT_ID.supabase.co:5432/postgres
+   ```
+
+**Important Notes:**
+- ✅ Use **Transaction Pooler** (port 6543) for `DATABASE_URL` - works on Render free tier
+- ⚠️ **Direct Connection** (port 5432) only supports IPv6 - use only for `DIRECT_URL`
+- 🔑 Replace `[PASSWORD]` with your actual database password
 
 ### Run Migrations
 
@@ -238,13 +283,18 @@ Both Vercel and Render are configured for automatic deployments:
 
 ### Database connection fails
 
-**Symptoms**: "Can't reach database server" errors
+**Symptoms**: "Can't reach database server" errors, P1001 or P1000 errors
 
 **Solutions**:
-1. Verify Supabase project is active
-2. Check connection string format
-3. Ensure password is correct
-4. Try using Direct URL instead of Pooler for testing
+1. **Use Transaction Pooler for DATABASE_URL**:
+   - Format: `postgresql://postgres.PROJECT_ID:PASSWORD@aws-*.pooler.supabase.com:6543/postgres`
+   - This is IPv4 compatible and works on Render free tier
+2. **DO NOT use Direct Connection for DATABASE_URL on Render**:
+   - Direct Connection (port 5432) only supports IPv6
+   - Only use Direct Connection for `DIRECT_URL` (for migrations)
+3. Verify Supabase project is active
+4. Check password is correct - reset in Supabase Dashboard if needed
+5. Ensure connection string format matches exactly (including `postgres.PROJECT_ID` for pooler)
 
 ---
 

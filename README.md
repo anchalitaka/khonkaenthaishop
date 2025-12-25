@@ -76,8 +76,8 @@ Password: [YOUR_PASSWORD]
 ```bash
 # apps/backend/.env
 
-# Connection Pooler (Transaction mode) - ใช้สำหรับ Prisma Client
-DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.[PROJECT_ID].supabase.co:6543/postgres?pgbouncer=true"
+# Connection Pooler (Transaction mode) - ใช้สำหรับ Prisma Client (IPv4 Compatible)
+DATABASE_URL="postgresql://postgres.[PROJECT_ID]:[YOUR_PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres"
 
 # Direct Connection - ใช้สำหรับ Prisma Migrate
 DIRECT_URL="postgresql://postgres:[YOUR_PASSWORD]@db.[PROJECT_ID].supabase.co:5432/postgres"
@@ -99,9 +99,17 @@ FRONTEND_URL=http://localhost:3000
 **ตัวอย่างจริง:**
 
 ```bash
-DATABASE_URL="postgresql://postgres:mypassword123@db.tnsuurwxjxpraldilqwt.supabase.co:6543/postgres?pgbouncer=true"
+# Transaction Pooler (IPv4 compatible - สำหรับ Render/Vercel)
+DATABASE_URL="postgresql://postgres.tnsuurwxjxpraldilqwt:mypassword123@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres"
+
+# Direct Connection (สำหรับ local development และ migrations)
 DIRECT_URL="postgresql://postgres:mypassword123@db.tnsuurwxjxpraldilqwt.supabase.co:5432/postgres"
 ```
+
+**📍 สำคัญ:**
+- ใช้ **Transaction Pooler** (`aws-*.pooler.supabase.com:6543`) สำหรับ production เพราะรองรับ IPv4
+- User format: `postgres.[PROJECT_ID]` สำหรับ Pooler
+- Direct connection ใช้ `postgres` (ไม่มี project ID)
 
 ### 3. สร้าง Database Schema
 
@@ -301,27 +309,35 @@ cd apps/backend && npx prisma generate
 
 ### ปัญหา 3: Supabase connection error
 
-**อาการ:** `Error: Tenant or user not found` หรือ `FATAL: password authentication failed`
+**อาการ:** `Error: Tenant or user not found`, `FATAL: password authentication failed`, หรือ `Can't reach database server`
 
 **วิธีแก้:**
 
-1. ตรวจสอบว่า connection string ถูกต้อง:
-   - ใช้ `db.[PROJECT_ID].supabase.co` **ไม่ใช่** `aws-0-ap-southeast-1.pooler.supabase.com`
-   - Username คือ `postgres` **ไม่ใช่** `postgres.[PROJECT_ID]`
-
-2. ตรวจสอบ password:
-   - Password ต้องตรงกับที่ตั้งไว้ตอนสร้าง project
-   - ถ้าลืม password ให้ reset ใน Supabase Dashboard → Settings → Database
-
-3. ตัวอย่าง connection string ที่ถูกต้อง:
-
+1. **สำหรับ Local Development** - ใช้ Direct Connection:
 ```bash
-# ✅ ถูกต้อง
-DATABASE_URL="postgresql://postgres:mypassword@db.abc123.supabase.co:6543/postgres?pgbouncer=true"
-
-# ❌ ผิด
-DATABASE_URL="postgresql://postgres.abc123:mypassword@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+# ✅ ถูกต้อง (Local)
+DATABASE_URL="postgresql://postgres:mypassword@db.abc123.supabase.co:5432/postgres"
 ```
+
+2. **สำหรับ Production (Render/Vercel)** - ใช้ Transaction Pooler:
+```bash
+# ✅ ถูกต้อง (Production - IPv4 compatible)
+DATABASE_URL="postgresql://postgres.abc123:mypassword@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres"
+```
+
+3. **หา Connection String ที่ถูกต้อง:**
+   - Supabase Dashboard → Settings → Database → Connection String
+   - คลิก dropdown **"Connection String"** เลือก **"Transaction pooler"**
+   - คัดลอก connection string ที่แสดง
+
+4. **ตรวจสอบ password:**
+   - Password ต้องตรงกับที่ตั้งไว้ตอนสร้าง project
+   - ถ้าลืม password ให้ reset: Supabase Dashboard → Settings → Database → Reset Database Password
+
+5. **IPv4 vs IPv6:**
+   - Direct Connection (port 5432) รองรับเฉพาะ IPv6 (ต้องซื้อ add-on $4 สำหรับ IPv4)
+   - Transaction Pooler (port 6543) รองรับ IPv4 ฟรี ✅
+   - Render/Vercel ใช้ IPv4 ดังนั้นต้องใช้ Transaction Pooler
 
 ### ปัญหา 4: Prisma version 7 error
 
