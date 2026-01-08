@@ -1,6 +1,6 @@
 import useSWR from "swr";
-import { usersApi, postsApi } from "./api";
-import type { User, Post, PaginatedResponse } from "@/types";
+import { categoriesApi, suppliersApi, productsApi } from "./api";
+import type { Category, Supplier, Product, PaginatedResponse } from "@/types";
 
 // Generic fetcher
 const fetcher = async <T>(fn: () => Promise<{ data: T }>): Promise<T> => {
@@ -16,51 +16,89 @@ const swrConfig = {
   dedupingInterval: 60000,       // ไม่ส่ง request ซ้ำภายใน 60 วินาที
 };
 
-// Users hooks
-export function useUsers(params?: { skip?: number; take?: number }) {
-  return useSWR<PaginatedResponse<User>>(
-    ["users", params],
-    () => fetcher(() => usersApi.getAll(params)), //select * from
-    swrConfig
-  );
-}
-
-export function useUser(id: string | null) {
-  return useSWR<User>(
-    id ? ["user", id] : null,
-    () => fetcher(() => usersApi.getOne(id!)), //select where id = {id}
-    swrConfig
-  );
-}
-
-// Posts hooks
-export function usePosts(params?: {
+// Categories hooks
+export function useCategories(params?: {
   skip?: number;
   take?: number;
-  published?: boolean;
+  isActive?: boolean;
 }) {
-  return useSWR<PaginatedResponse<Post>>(
-    ["posts", params],
-    () => fetcher(() => postsApi.getAll(params)),
+  return useSWR<PaginatedResponse<Category>>(
+    ["categories", params],
+    () => fetcher(() => categoriesApi.getAll(params)),
     swrConfig
   );
 }
 
-export function usePost(id: string | null) {
-  return useSWR<Post>(
-    id ? ["post", id] : null,
-    () => fetcher(() => postsApi.getOne(id!)),
+export function useCategory(id: string | null) {
+  return useSWR<Category>(
+    id ? ["category", id] : null,
+    () => fetcher(() => categoriesApi.getOne(id!)),
     swrConfig
   );
 }
 
-export function usePostsByAuthor(
-  authorId: string | null,
+// Suppliers hooks
+export function useSuppliers(params?: {
+  skip?: number;
+  take?: number;
+  isActive?: boolean;
+}) {
+  return useSWR<PaginatedResponse<Supplier>>(
+    ["suppliers", params],
+    () => fetcher(() => suppliersApi.getAll(params)),
+    swrConfig
+  );
+}
+
+export function useSupplier(id: string | null) {
+  return useSWR<Supplier>(
+    id ? ["supplier", id] : null,
+    () => fetcher(() => suppliersApi.getOne(id!)),
+    swrConfig
+  );
+}
+
+// Products hooks
+export function useProducts(params?: {
+  skip?: number;
+  take?: number;
+  isActive?: boolean;
+  categoryId?: string;
+  supplierId?: string;
+}) {
+  return useSWR<PaginatedResponse<Product>>(
+    ["products", params],
+    () => fetcher(() => productsApi.getAll(params)),
+    swrConfig
+  );
+}
+
+export function useProduct(id: string | null) {
+  return useSWR<Product>(
+    id ? ["product", id] : null,
+    () => fetcher(() => productsApi.getOne(id!)),
+    swrConfig
+  );
+}
+
+export function useProductsByCategory(
+  categoryId: string | null,
   params?: { skip?: number; take?: number }
 ) {
-  return useSWR<PaginatedResponse<Post>>(
-    authorId ? ["posts", "author", authorId, params] : null,
-    () => fetcher(() => postsApi.getByAuthor(authorId!, params)),
+  return useSWR<PaginatedResponse<Product>>(
+    categoryId ? ["products", "category", categoryId, params] : null,
+    () => fetcher(() => productsApi.getByCategory(categoryId!, params)),
+    swrConfig
+  );
+}
+
+export function useProductsBySupplier(
+  supplierId: string | null,
+  params?: { skip?: number; take?: number }
+) {
+  return useSWR<PaginatedResponse<Product>>(
+    supplierId ? ["products", "supplier", supplierId, params] : null,
+    () => fetcher(() => productsApi.getBySupplier(supplierId!, params)),
     swrConfig
   );
 }

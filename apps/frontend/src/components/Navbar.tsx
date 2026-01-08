@@ -8,8 +8,9 @@ export default function Navbar() {
 
   const links = [
     { href: '/', label: 'หน้าแรก' },
-    { href: '/users', label: 'ผู้ใช้งาน' },
-    { href: '/posts', label: 'โพสต์' },
+    { href: '/products', label: 'สินค้า' },
+    { href: '/categories', label: 'หมวดหมู่' },
+    { href: '/suppliers', label: 'ผู้จำหน่าย' },
   ];
 
   return (
@@ -18,7 +19,7 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-blue-600">FullStack App</span>
+              <span className="text-xl font-bold text-blue-600">ร้านขอนแก่น</span>
             </Link>
             <div className="hidden sm:ml-8 sm:flex sm:space-x-4">
               {links.map((link) => (

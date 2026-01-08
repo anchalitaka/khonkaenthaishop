@@ -12,92 +12,66 @@ datasource db {
 }
 
 // =============================================
-// User Management
+// Product Management System - ร้านขอนแก่น
 // =============================================
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      Role     @default(USER)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  // ข้อมูลส่วนตัว (Personal Information)
-  employeeType  String?  // ประเภทบุคคล (พนักงานประจำ, สัญญาจ้าง)
-  nationalId    String?  @unique // เลขประจำตัวประชาชน
-  titleTh       String?  // คำนำหน้า (นาย, นาง, นางสาว)
-  firstNameTh   String?  // ชื่อ(ภาษาไทย)
-  lastNameTh    String?  // นามสกุล(ภาษาไทย)
-  firstNameEn   String?  // ชื่อ(ภาษาอังกฤษ)
-  lastNameEn    String?  // นามสกุล(ภาษาอังกฤษ)
-  nickname      String?  // ชื่อเล่น
-  gender        String?  // เพศ (ชาย, หญิง)
-  bloodType     String?  // หมู่โลหิต
-  birthDate     DateTime? // วันเกิด
-  ethnicity     String?  // เชื้อชาติ
-  nationality   String?  // สัญชาติ
-  religion      String?  // ศาสนา
-  phone         String?  // เบอร์โทรศัพท์
-  province      String?  // ภูมิลำเนา จังหวัด
-  maritalStatus String?  // สถานภาพสมรส
+// หมวดหมู่สินค้า
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  // ข้อมูลการทำงาน (Employment Information)
-  username         String?  @unique // รหัสผู้ใช้
-  employeeId       String?  @unique // รหัสพนักงาน
-  position         String?  // ตำแหน่ง
-  positionLevel    String?  // ระดับตำแหน่ง
-  department       String?  // แผนก
-  employmentStatus String?  // สถานะการจ้างงาน
-  startDate        DateTime? // วันที่เริ่มงาน
+  products    Product[]
 
-  // Legacy field (for compatibility)
-  name String? // ชื่อเต็ม (deprecated, use firstNameTh/lastNameTh instead)
-
-  posts    Post[]
-  comments Comment[]
-
-  @@map("users")
+  @@map("categories")
 }
 
-enum Role {
-  USER
-  ADMIN
+// ผู้จำหน่าย/ซัพพลายเออร์
+model Supplier {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  contactPerson String?
+  phone         String?
+  email         String?
+  address       String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  products      Product[]
+
+  @@map("suppliers")
 }
 
-// =============================================
-// Content Management
-// =============================================
-model Post {
-  id          String   @id @default(cuid())
-  title       String
-  content     String?
-  published   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// สินค้า
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  stock       Int       @default(0)
+  sku         String    @unique  // รหัสสินค้า
+  barcode     String?   @unique
+  weight      Float?
+  unit        String?   // หน่วยนับ (กล่อง, ชิ้น, กก.)
+  expiryDate  DateTime?
+  imageUrl    String?   // URL จาก Supabase Storage
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId String
+  // Relations
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  String?
 
-  comments Comment[]
+  supplier    Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  supplierId  String?
 
-  @@index([authorId])
-  @@map("posts")
-}
-
-model Comment {
-  id        String   @id @default(cuid())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId String
-
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String
-
-  @@index([authorId])
-  @@index([postId])
-  @@map("comments")
+  @@index([categoryId])
+  @@index([supplierId])
+  @@index([sku])
+  @@map("products")
 }

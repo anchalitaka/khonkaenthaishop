@@ -29,8 +29,8 @@ export class PrismaService
     }
 
     // Delete in order of dependencies
-    await this.comment.deleteMany();
-    await this.post.deleteMany();
-    await this.user.deleteMany();
+    await this.product.deleteMany();
+    await this.category.deleteMany();
+    await this.supplier.deleteMany();
   }
 }

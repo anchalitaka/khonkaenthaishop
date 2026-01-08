@@ -1,170 +1,120 @@
-// User types
-export interface User {
+// Category types
+export interface Category {
   id: string;
-  email: string;
-  role: "USER" | "ADMIN";
+  name: string;
+  description?: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-
-  // ข้อมูลส่วนตัว (Personal Information)
-  employeeType?: string | null;
-  nationalId?: string | null;
-  titleTh?: string | null;
-  firstNameTh?: string | null;
-  lastNameTh?: string | null;
-  firstNameEn?: string | null;
-  lastNameEn?: string | null;
-  nickname?: string | null;
-  gender?: string | null;
-  bloodType?: string | null;
-  birthDate?: string | null;
-  ethnicity?: string | null;
-  nationality?: string | null;
-  religion?: string | null;
-  phone?: string | null;
-  province?: string | null;
-  maritalStatus?: string | null;
-
-  // ข้อมูลการทำงาน (Employment Information)
-  username?: string | null;
-  employeeId?: string | null;
-  position?: string | null;
-  positionLevel?: string | null;
-  department?: string | null;
-  employmentStatus?: string | null;
-  startDate?: string | null;
-
-  // Legacy
-  name?: string | null;
-
   _count?: {
-    posts: number;
-    comments: number;
+    products: number;
   };
 }
 
-export interface CreateUserInput {
-  email: string;
-  password: string;
-
-  // ข้อมูลส่วนตัว
-  employeeType?: string;
-  nationalId?: string;
-  titleTh?: string;
-  firstNameTh?: string;
-  lastNameTh?: string;
-  firstNameEn?: string;
-  lastNameEn?: string;
-  nickname?: string;
-  gender?: string;
-  bloodType?: string;
-  birthDate?: string;
-  ethnicity?: string;
-  nationality?: string;
-  religion?: string;
-  phone?: string;
-  province?: string;
-  maritalStatus?: string;
-
-  // ข้อมูลการทำงาน
-  username?: string;
-  employeeId?: string;
-  position?: string;
-  positionLevel?: string;
-  department?: string;
-  employmentStatus?: string;
-  startDate?: string;
-
-  // Legacy
-  name?: string;
-  role?: "USER" | "ADMIN";
-}
-
-export interface UpdateUserInput {
-  email?: string;
-  password?: string;
+export interface CreateCategoryInput {
+  name: string;
+  description?: string;
   isActive?: boolean;
-  role?: "USER" | "ADMIN";
+}
 
-  // ข้อมูลส่วนตัว
-  employeeType?: string;
-  nationalId?: string;
-  titleTh?: string;
-  firstNameTh?: string;
-  lastNameTh?: string;
-  firstNameEn?: string;
-  lastNameEn?: string;
-  nickname?: string;
-  gender?: string;
-  bloodType?: string;
-  birthDate?: string;
-  ethnicity?: string;
-  nationality?: string;
-  religion?: string;
-  phone?: string;
-  province?: string;
-  maritalStatus?: string;
-
-  // ข้อมูลการทำงาน
-  username?: string;
-  employeeId?: string;
-  position?: string;
-  positionLevel?: string;
-  department?: string;
-  employmentStatus?: string;
-  startDate?: string;
-
-  // Legacy
+export interface UpdateCategoryInput {
   name?: string;
+  description?: string;
+  isActive?: boolean;
 }
 
-// Post types
-export interface Post {
+// Supplier types
+export interface Supplier {
   id: string;
-  title: string;
-  content: string | null;
-  published: boolean;
+  name: string;
+  contactPerson?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  authorId: string;
-  author?: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-  comments?: Comment[];
   _count?: {
-    comments: number;
+    products: number;
   };
 }
 
-export interface CreatePostInput {
-  title: string;
-  content?: string;
-  published?: boolean;
-  authorId: string;
+export interface CreateSupplierInput {
+  name: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  isActive?: boolean;
 }
 
-export interface UpdatePostInput {
-  title?: string;
-  content?: string;
-  published?: boolean;
+export interface UpdateSupplierInput {
+  name?: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  isActive?: boolean;
 }
 
-// Comment types
-export interface Comment {
+// Product types
+export interface Product {
   id: string;
-  content: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  stock: number;
+  sku: string;
+  barcode?: string | null;
+  weight?: number | null;
+  unit?: string | null;
+  expiryDate?: string | null;
+  imageUrl?: string | null;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  authorId: string;
-  postId: string;
-  author?: {
+  categoryId?: string | null;
+  supplierId?: string | null;
+  category?: {
     id: string;
-    name: string | null;
-    email: string;
+    name: string;
   };
+  supplier?: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface CreateProductInput {
+  name: string;
+  description?: string;
+  price: number;
+  stock: number;
+  sku: string;
+  barcode?: string;
+  weight?: number;
+  unit?: string;
+  expiryDate?: string;
+  categoryId?: string;
+  supplierId?: string;
+  isActive?: boolean;
+  image?: File;
+}
+
+export interface UpdateProductInput {
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  sku?: string;
+  barcode?: string;
+  weight?: number;
+  unit?: string;
+  expiryDate?: string;
+  categoryId?: string;
+  supplierId?: string;
+  isActive?: boolean;
+  image?: File;
 }
 
 // API Response types

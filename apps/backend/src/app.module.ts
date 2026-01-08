@@ -3,8 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma';
-import { UsersModule } from './users';
-import { PostsModule } from './posts';
+import { StorageModule } from './storage';
+import { CategoriesModule } from './categories';
+import { SuppliersModule } from './suppliers';
+import { ProductsModule } from './products';
 
 @Module({
   imports: [
@@ -13,8 +15,10 @@ import { PostsModule } from './posts';
       envFilePath: '.env',
     }),
     PrismaModule,
-    UsersModule,
-    PostsModule,
+    StorageModule,
+    CategoriesModule,
+    SuppliersModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
